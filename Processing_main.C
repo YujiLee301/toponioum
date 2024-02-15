@@ -20,7 +20,7 @@ class EvtProducer{
       float mumuEff, bbEff;
       float muonPtcut=5;
       float jetPtCut;
-      float muonEtacut=2.4; float jetEtacut=2.5;
+      float muonEtacut=2.4; float jetEtacut=4.7;
       int Nbjetcut; //0,1,2
       float SMbbRvalue, SigbkgRvalue; // Rvalue: N(ee->bb)/N(ee->mumu) in a dataset
       float Luminosity;
@@ -155,6 +155,7 @@ float EvtProducer::GetbbEvts(const char* inputName){
 void EvtProducer::getbbDetectedEvtNum(){
     float Nmumu;
     Nmumu = Luminosity*nEvtmumuXS*mumuEff;
+    cout<<"getRvalue(SigbkgsampleName):"<<getRvalue(SigbkgsampleName)<<" getRvalue(SMbbsampleName)"<<getRvalue(SMbbsampleName)<<endl;
     DetectedNsigbkg = Nmumu * getRvalue(SigbkgsampleName);
     DetectedNbkg = Nmumu * getRvalue(SMbbsampleName);
 }
@@ -180,7 +181,7 @@ class InputTags{
       const char* SMbbsampleName;const char* SigbkgsampleName;const char* mumuSampleName;const char* bbSampleName;
 };
 void Processing(InputTags Input){
-    Input.Ana.SetInputfiles("delphes_output_eebb_B_345p91.root","delphes_output_eebb_SB_345p91.root","delphes_output_eemumu_345p91.root","delphes_output_eebb_345p91.root");
+    Input.Ana.SetInputfiles(Input.SMbbsampleName,Input.SigbkgsampleName,Input.mumuSampleName,Input.bbSampleName);
     Input.Ana.jetPtCut = Input.jetPtCut; Input.Ana.Nbjetcut = Input.Nbjetcut; 
     Input.Ana.Luminosity = Input.Luminosity;
     Input.Ana.setTotalEvts(Input.totalGENevts,Input.totalGENevts,Input.totalGENevts,Input.totalGENevts);
@@ -189,16 +190,16 @@ void Processing(InputTags Input){
     Input.Ana.MeasuremumuEff();
     Input.Ana.getbbDetectedEvtNum();
     Input.Ana.ExtractJtbbXS();
-    cout<<"SigNum:"<<Input.Ana.DetectedNsig<<" S+BNum:"<<Input.Ana.DetectedNsigbkg<< "  Gaussian sigma = "<< -1*Input.Ana.zExp << endl;
+    cout<<"SigNum:"<<Input.Ana.DetectedNsig<<" S+BNum:"<<Input.Ana.DetectedNsigbkg<< "  Gaussian sigma = "<< abs(Input.Ana.zExp) << endl;
 }
 
 
 void Processing_main(){
     InputTags input;
     input.Energy = 345.91;
-    input.jetPtCut = 150;
+    input.jetPtCut = 120;
     input.Nbjetcut = 1;
-    input.Luminosity = 200; 
+    input.Luminosity = 100; 
     input.totalGENevts = 100000;
     input.bbXS = 826.21;//[fb]
     input.mumuXS = 954.11;//[fb]
@@ -207,6 +208,22 @@ void Processing_main(){
     input.mumuSampleName = "delphes_output_eemumu_345p91.root";
     input.bbSampleName = "delphes_output_eebb_345p91.root";
     Processing(input);
+    cout<<"Energy: 345p91 Lumi:"<<input.Luminosity<<endl;
+
+    InputTags input1;
+    input1.Energy = 342.544;
+    input1.jetPtCut = 120;
+    input1.Nbjetcut = 1;
+    input1.Luminosity = 100; 
+    input1.totalGENevts = 100000;
+    input1.bbXS = 844.32;//[fb]
+    input1.mumuXS = 973.41;//[fb]
+    input1.SMbbsampleName = "delphes_output_eebb_B_342p544.root";
+    input1.SigbkgsampleName = "delphes_output_eebb_SB_342p544.root";
+    input1.mumuSampleName = "delphes_output_eemumu_342p544.root";
+    input1.bbSampleName = "delphes_output_eebb_342p544.root";
+    Processing(input1);
+    cout<<"Energy: 342p544 Lumi:"<<input.Luminosity<<endl;
 }
 
 /*
